@@ -1,4 +1,4 @@
-package net.mejf.jfdedup;
+package net.mejf.jfdedup2;
 
 import org.apache.commons.cli.*;
 

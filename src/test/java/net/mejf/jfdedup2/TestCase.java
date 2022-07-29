@@ -1,4 +1,4 @@
-package net.mejf.jfdedup;
+package net.mejf.jfdedup2;
 
 import org.apache.maven.surefire.util.TeeStream;
 import org.junit.Assert;
