@@ -1,14 +1,15 @@
 package net.mejf.jfdedup;
 
-import java.nio.charset.Charset;
 import org.apache.maven.surefire.util.TeeStream;
+import org.junit.Assert;
 import org.junit.Before;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public class TestCase {
+public class TestCase extends Assert {
 
     private static final Charset CHARSET = StandardCharsets.UTF_8;
 
@@ -31,5 +32,21 @@ public class TestCase {
     protected String getErr() {
         System.out.flush();
         return errBuffer.toString(CHARSET);
+    }
+
+    protected void assertSomethingWrittenToStdout() {
+        assertNotEquals("Nothing written to stdout", 0, getOut().length());
+    }
+
+    protected void assertNothingWritterntoStdout() {
+        assertEquals("Something written to stdout", "", getOut());
+    }
+
+    protected void assertSomethingWrittenToStderr() {
+        assertNotEquals("Nothing written to stderr", 0, getErr().length());
+    }
+
+    protected void assertNothingWritterntoStderr() {
+        assertEquals("Something written to stderr", "", getErr());
     }
 }
