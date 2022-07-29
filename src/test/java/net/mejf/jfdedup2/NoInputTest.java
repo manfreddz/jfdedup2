@@ -6,7 +6,7 @@ import org.junit.Test;
 public class NoInputTest extends TestCase {
     @Test
     public void testNoInput() {
-        assertEquals(1, Main.runMain());
+        assertEquals(2, Main.runMain());
 
         assertNothingWritterntoStdout();
         assertSomethingWrittenToStderr();

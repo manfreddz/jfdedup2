@@ -3,7 +3,6 @@ package net.mejf.jfdedup2;
 import org.apache.commons.cli.*;
 
 import java.io.File;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -16,6 +15,7 @@ public class Main {
 
         options.addOption("h", "help", false, "Print help");
         options.addOption("d", "debug", false, "Print debug info");
+        options.addOption("H", "hardlinks", false, "Replace dups with hardlinks");
     }
 
     public static void main(String[] args) {
@@ -28,7 +28,7 @@ public class Main {
         }
     }
 
-    static int runMain(String... args) {
+    public static int runMain(String... args) {
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd;
         try {
@@ -36,7 +36,7 @@ public class Main {
         } catch (ParseException e) {
             err("Failed to parse command line: %s", e.getLocalizedMessage());
             printHelp();
-            return 2;
+            return 1;
         }
 
         if (cmd.hasOption('h')) {
@@ -50,7 +50,14 @@ public class Main {
 
         if (cmd.getArgList().isEmpty()) {
             err("No files or directories provided");
-            return 1;
+            return 2;
+        }
+
+        final FileList fileList = getFileList(cmd.getArgList());
+
+        if (fileList.isEmpty()) {
+            err("No files or directories found");
+            return 3;
         }
 
         return 0;
@@ -75,14 +82,14 @@ public class Main {
         formatter.printHelp("jfdedup2 [OPTION]... [FILE/DIRECTORY]...", options);
     }
 
-    static List<String> getFileList(List<String> fileList) {
-        List<String> ret = new LinkedList<>();
+    static FileList getFileList(List<String> fileList) {
+        FileList ret = new FileList();
         ListIterator<String> it = fileList.listIterator();
 
         while (it.hasNext()) {
             File file = new File(it.next());
             if (file.isFile()) {
-                ret.add(file.getAbsolutePath());
+                ret.add(new JFile(file.getAbsolutePath()));
             } else {
                 throw new RuntimeException("Unknown file type: " + file.getAbsolutePath());
             }

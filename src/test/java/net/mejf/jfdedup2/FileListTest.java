@@ -12,7 +12,7 @@ public class FileListTest extends TestCase {
         createFile("a", "foobar");
         createFile("b", "foobar2");
 
-        final List<String> actual = Main.getFileList(fileList("a", "b"));
+        final List<?> actual = Main.getFileList(fileList("a", "b"));
 
         assertEquals(2, actual.size());
     }
