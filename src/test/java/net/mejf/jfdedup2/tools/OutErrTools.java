@@ -1,4 +1,4 @@
-package net.mejf.jfdedup2;
+package net.mejf.jfdedup2.tools;
 
 import org.apache.maven.surefire.util.TeeStream;
 import org.junit.Assert;
@@ -9,10 +9,8 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public class TestCase extends Assert {
-
+public class OutErrTools extends Assert {
     private static final Charset CHARSET = StandardCharsets.UTF_8;
-
     private ByteArrayOutputStream outBuffer;
     private ByteArrayOutputStream errBuffer;
 

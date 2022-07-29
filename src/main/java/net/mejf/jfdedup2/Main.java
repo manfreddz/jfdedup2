@@ -2,6 +2,11 @@ package net.mejf.jfdedup2;
 
 import org.apache.commons.cli.*;
 
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+
 public class Main {
     private static final Options options;
     private static boolean debug = false;
@@ -30,6 +35,7 @@ public class Main {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
             err("Failed to parse command line: %s", e.getLocalizedMessage());
+            printHelp();
             return 2;
         }
 
@@ -67,5 +73,21 @@ public class Main {
     private static void printHelp() {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("jfdedup2 [OPTION]... [FILE/DIRECTORY]...", options);
+    }
+
+    static List<String> getFileList(List<String> fileList) {
+        List<String> ret = new LinkedList<>();
+        ListIterator<String> it = fileList.listIterator();
+
+        while (it.hasNext()) {
+            File file = new File(it.next());
+            if (file.isFile()) {
+                ret.add(file.getAbsolutePath());
+            } else {
+                throw new RuntimeException("Unknown file type: " + file.getAbsolutePath());
+            }
+        }
+
+        return ret;
     }
 }
