@@ -10,6 +10,7 @@ public class TestCase extends FileHandlingTools {
 
     protected String[] mixed(Object... args) {
         List<String> ret = new LinkedList<>();
+        ret.add("-d");
         for (Object arg: args) {
             if (arg instanceof String) {
                 ret.add((String) arg);

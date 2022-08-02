@@ -99,11 +99,15 @@ public class FileHandlingTools extends OutErrTools {
     }
 
     protected void assertFilesAreDistinctInodes(String file1, String file2) {
-        assertNotEquals(getFingerprint(prependTmpdir(file1)), getFingerprint(prependTmpdir(file2)));
+        assertNotEquals(getPrependedFingerprint(file1), getPrependedFingerprint(file2));
     }
 
     protected void assertFilesAreSameInodes(String file1, String file2) {
-        assertEquals(getFingerprint(prependTmpdir(file1)), getFingerprint(prependTmpdir(file2)));
+        assertEquals(getPrependedFingerprint(file1), getPrependedFingerprint(file2));
+    }
+
+    protected String getPrependedFingerprint(String file1) {
+        return getFingerprint(prependTmpdir(file1));
     }
 
     private String prependTmpdir(String file1) {

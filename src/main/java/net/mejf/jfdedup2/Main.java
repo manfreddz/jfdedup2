@@ -3,12 +3,18 @@ package net.mejf.jfdedup2;
 import org.apache.commons.cli.*;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Collectors;
 
 public class Main {
     private static final Options options;
     private static boolean debug = false;
+    private static boolean allRecursive = false;
+    private static FileList lastFileList;
 
     static {
         options = new Options();
@@ -16,6 +22,9 @@ public class Main {
         options.addOption("h", "help", false, "Print help");
         options.addOption("d", "debug", false, "Print debug info");
         options.addOption("H", "hardlinks", false, "Replace dups with hardlinks");
+        options.addOption("R", "all-recursive", false, "Search all directories recursively");
+//        options.addOption("s", "follow-symlinks", false, "Follow symlinks (not implemented yet)");
+//        options.addOption("D", "delete-dups", true, "Whether to delete dups");
     }
 
     public static void main(String[] args) {
@@ -48,12 +57,17 @@ public class Main {
             Main.debug = true;
         }
 
+        if (cmd.hasOption('R')) {
+            Main.allRecursive = true;
+        }
+
         if (cmd.getArgList().isEmpty()) {
             err("No files or directories provided");
             return 2;
         }
 
         final FileList fileList = getFileList(cmd.getArgList());
+        lastFileList = fileList;
 
         if (fileList.isEmpty()) {
             err("No files or directories found");
@@ -84,17 +98,57 @@ public class Main {
 
     static FileList getFileList(List<String> fileList) {
         FileList ret = new FileList();
-        ListIterator<String> it = fileList.listIterator();
+        int prio = 1;
 
-        while (it.hasNext()) {
-            File file = new File(it.next());
-            if (file.isFile()) {
-                ret.add(new JFile(file.getAbsolutePath()));
-            } else {
-                throw new RuntimeException("Unknown file type: " + file.getAbsolutePath());
+        for (String path : fileList) {
+            boolean recursive = allRecursive;
+            if (path.startsWith("r:")) {
+                path = path.substring(2);
+                recursive = true;
+            }
+
+            getFileListWorker(path, ret, prio++, recursive);
+        }
+
+        if (debug) {
+            debug("Got file list:");
+            for (JFile jFile : ret) {
+                debug(jFile.getName());
             }
         }
 
         return ret;
+    }
+
+    private static void getFileListWorker(String path, FileList ret, int prio, boolean recursive) {
+        File file = new File(path);
+
+        try {
+            if (file.isFile()) {
+                debug("File: %s", file.getAbsolutePath());
+                ret.add(new JFile(file.getAbsolutePath(), prio));
+
+            } else if (file.isDirectory()) {
+                debug("Dir: %s", file.getAbsolutePath());
+                for (File fileInDirectory : Files.list(file.toPath())
+                        .sorted()
+                        .map(Path::toFile)
+                        .collect(Collectors.toList())) {
+                    debug("Content: %s", fileInDirectory.getAbsolutePath());
+                    if ((fileInDirectory.isDirectory() && recursive) || fileInDirectory.isFile()) {
+                        getFileListWorker(fileInDirectory.getAbsolutePath(), ret, prio, recursive);
+                    }
+                }
+
+            } else {
+                throw new RuntimeException("Unknown file type: " + file.getAbsolutePath());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static FileList getLastFilelist() {
+        return lastFileList;
     }
 }
